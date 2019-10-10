@@ -1,0 +1,6 @@
+{
+	"autoload":
+	{
+		"classmap": ["pixpic.class.php"]
+	}
+}

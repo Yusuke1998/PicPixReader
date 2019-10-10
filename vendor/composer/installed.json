@@ -1,0 +1,20 @@
+[
+    {
+        "name": "phpclasses/pixpic",
+        "version": "0.5",
+        "version_normalized": "0.5.0.0",
+        "dist": {
+            "type": "zip",
+            "url": "https://www.phpclasses.org/install/package/pixpic.zip",
+            "reference": null,
+            "shasum": null
+        },
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "pixpic.class.php"
+            ]
+        }
+    }
+]
