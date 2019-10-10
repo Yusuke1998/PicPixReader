@@ -65,7 +65,7 @@ class PixReader extends Pixpic {
         }
     }
 
-    public function showLine(){
+    public function lineIdentifier(){
     	$pixel = $this->imageArrPixel();
 
     	$forma = "No esta definida!";
@@ -188,15 +188,15 @@ class PixReader extends Pixpic {
             }
             if($this->zoom>1){
                 if ($this->span>1){
-                    return "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->zoom+$this->span)."px;width:".imagesx($this->rs)*($this->zoom+$this->span)."px;'>".$a."</div>";
+                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->zoom+$this->span)."px;width:".imagesx($this->rs)*($this->zoom+$this->span)."px;'>".$a."</div>";
                 }else{
-                    return "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->zoom)."px;width:".imagesx($this->rs)*($this->zoom)."px;'>".$a."</div>";
+                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->zoom)."px;width:".imagesx($this->rs)*($this->zoom)."px;'>".$a."</div>";
                 }
             }else{
                 if ($this->span>1){
-                    return "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->span+1)."px;width:".imagesx($this->rs)*($this->span+1)."px;'>".$a."</div>";
+                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->span+1)."px;width:".imagesx($this->rs)*($this->span+1)."px;'>".$a."</div>";
                 }else{
-                    return "<div class='imgPixpic' style='height:".imagesy($this->rs)."px;width:".imagesx($this->rs)."px;'>".$a."</div>";
+                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)."px;width:".imagesx($this->rs)."px;'>".$a."</div>";
                 }
             }
         }else{
@@ -247,20 +247,12 @@ class PixReader extends Pixpic {
     public function saveImage($name='img_',$path = 'img/',$ext = 'png')
     {
     	$ruta = $path.$name.time().".$ext";
-    	dd($ruta);
-
-    	$save = imagegd2($this->rs,$ruta);
-    	if ($save) {
-    		return "Guardar Imagen <br>";
-    	}
+    	return imagegd2($this->rs,$ruta);
     }
 
     public function clearCache()
     {
-    	$delete = imagedestroy($this->rs);
-    	if ($delete) {
-    		return "Eliminar Imagen <br>";
-    	}
+    	return imagedestroy($this->rs);
     } 
 }
 
