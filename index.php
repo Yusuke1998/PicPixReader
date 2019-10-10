@@ -3,10 +3,10 @@
 require 'PixReader.php';
 
 $px = new PixReader;
-$img = "img/vertical-white.png";
+$img = "img/diagonal-white.png";
 $px->setImage($img);
 
-$px->zoom=1;
+$px->zoom=2;
 $px->span=1;
 
 // echo "1) Pasar imagen a escala de grises <br>";
@@ -26,8 +26,9 @@ $px->span=1;
 // echo "8) Invierte los colores en la imagen <br>";
 // $px->imageNegate();
 
+
+// $px->lineIdentifier();
+$px->pixMoore();
+
 $px->showImage();
-
-$px->lineIdentifier();
-
 $px->clearCache();

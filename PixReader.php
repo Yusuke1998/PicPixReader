@@ -14,47 +14,8 @@ class PixReader extends Pixpic {
     	if($this->determineProper()){
             for ($i = 0; $i < imagesy($this->rs); $i++){
                 for ($j = 0; $j < imagesx($this->rs); $j++) {
-                    $pixelxy = imagecolorat($this->rs, $j, $i);
-	                $rgb = imagecolorsforindex($this->rs, $pixelxy);
-	                $r=dechex($rgb["red"]);
-	                $g=dechex($rgb["green"]);
-	                $b=dechex($rgb["blue"]);
-	                if(strlen($r)==1){
-	                    $he="0".$r;
-	                }else{
-	                    $he=$r;
-	                }
-	                if(strlen($g)==1){
-	                    $he.="0".$g;
-	                }else{
-	                    $he.=$g;
-	                }
-	                if(strlen($b)==1){
-	                    $he.="0".$b;
-	                }else{
-	                    $he.=$b;
-	                }
-	                // color de pixel
-	                $c_px+=1;
-	                // Mis pruebas
-	                if ($he === 'ffffff') {
-		            	$pixel[]=array('X'=>$j,'Y'=>$i);
-		            	// color de pixel blanco +1
-		                $c_px_w+=1;
-	                }
-
-	                if ($he === '000000') {
-	                	// color de pixel negro +1
-		                $c_px_b+=1;
-	                }
-
-	                if ($he != '000000' && $he != 'ffffff') {
-	                	$clr_px.=$he.':';
-	                	$color_px = explode(':', $clr_px);
-	                	array_pop($color_px);
-	                	// color de pixel otro +1
-	                	$c_px_o+=1;
-	                }
+                    $hex = $this->hexPixel($j,$i);
+		            $pixel[]=array('X'=>$j,'Y'=>$i,'H'=>$hex);
                 }
             }
 
@@ -65,8 +26,49 @@ class PixReader extends Pixpic {
         }
     }
 
+    private function hexPixel($j,$i)
+    {
+        $pixelxy = imagecolorat($this->rs, $j, $i);
+        $rgb = imagecolorsforindex($this->rs, $pixelxy);
+        $r=dechex($rgb["red"]);
+        $g=dechex($rgb["green"]);
+        $b=dechex($rgb["blue"]);
+
+        if(strlen($r)==1){
+            $he="0".$r;
+        }else{
+            $he=$r;
+        }
+        if(strlen($g)==1){
+            $he.="0".$g;
+        }else{
+            $he.=$g;
+        }
+        if(strlen($b)==1){
+            $he.="0".$b;
+        }else{
+            $he.=$b;
+        }
+
+        return $he;
+    }
+
+    public function pixMoore()
+    {
+        // De izquierda a derecha, pixel a pixel:
+        $i = 0;
+        foreach ($this->imageArrPixel() as $key => $value) {
+            $i++;
+
+            if ($i == 1) {
+                dd($value['H']);
+            }
+        }
+
+    }
+
     public function lineIdentifier(){
-    	$pixel = $this->imageArrPixel();
+        $pixel = $this->imageArrPixel();
 
     	$forma = "No esta definida!";
     	$inicial = true; #condicional
@@ -182,7 +184,7 @@ class PixReader extends Pixpic {
                     if($this->span>1){$a.=$this->span;}else{$a.= "0";}
                     $a.="px;margin-bottom:";
                     if($this->span>1){$a.=$this->span;}else{$a.= "0";}
-                    $a.="px' title='$i-$j'></div>";
+                    $a.="px' title='(Y=$i - X=$j)'></div>";
                     $he="";
                 }
             }
