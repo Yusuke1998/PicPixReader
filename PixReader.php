@@ -61,7 +61,7 @@ class PixReader extends Pixpic {
             $i++;
 
             if ($i == 1) {
-                dd($value['H']);
+                // dd($value['H']);
             }
         }
 
