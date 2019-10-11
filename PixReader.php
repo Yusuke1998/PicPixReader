@@ -7,9 +7,6 @@ class PixReader extends Pixpic {
 
 	private function imageArrPixel()
     {
-    	$a=null;$c_px = 0;$c_px_b = 0;$c_px_w = 0;$c_px_o = 0;
-	    $color_px = [];$O = [];
-	    $clr_px = "";$o = "";
     	$pixel=[];
     	if($this->determineProper()){
             for ($i = 0; $i < imagesy($this->rs); $i++){
@@ -18,9 +15,7 @@ class PixReader extends Pixpic {
 		            $pixel[]=array('X'=>$j,'Y'=>$i,'H'=>$hex);
                 }
             }
-
-        return $pixel;
-
+            return $pixel;
         }else{
             return $this->error();
         }
@@ -49,22 +44,30 @@ class PixReader extends Pixpic {
         }else{
             $he.=$b;
         }
-
         return $he;
     }
 
     public function pixMoore()
     {
         // De izquierda a derecha, pixel a pixel:
-        $i = 0;
-        foreach ($this->imageArrPixel() as $key => $value) {
-            $i++;
+        foreach ($this->imageArrPixel() as $i => $p) {
 
-            if ($i == 1) {
-                // dd($value['H']);
-            }
+            // 4 vecinos verticales y horizontales, cuyas coordenadas son
+            //  (x,y-1); (x,y+1); (x-1,y); (x+1,y)
+            //  Son llamados 4-vecinos de p, y se representan por N4(p).
+            // 4 vecinos diagonales, cuyas coordenadas son
+            //  (x-1,y-1); (x-1,y+1); (x+1,y-1); (x+1,y+1)
+            //  Son representados por ND(p)
+            
+            // [$p['X'],$p['Y']-1],
+            // [$p['X'],$p['Y']+1],
+            // [$p['X']-1,$p['Y']],
+            // [$p['X']+1,$p['Y']],
+            // [$p['X']-1,$p['Y']-1],
+            // [$p['X']-1,$p['Y']+1],
+            // [$p['X']+1,$p['Y']-1],
+            // [$p['X']+1,$p['Y']+1]
         }
-
     }
 
     public function lineIdentifier(){
@@ -133,26 +136,6 @@ class PixReader extends Pixpic {
 	    echo "Forma: $forma";
     }
 
-    public function showCoor(){
-    	$pixel = $this->imageArrPixel();
-		echo "<table>";
-			echo "<thead>";
-				echo "<tr>";
-					echo "<th>X</th>";
-					echo "<th>Y</th>";
-				echo "</tr>";
-			echo "</thead>";
-			echo "<tbody>";
-			foreach ($pixel as $key => $value) {
-    			echo "<tr>";
-    				echo "<td>$value[X]</td>";
-    				echo "<td>$value[Y]</td>";
-    			echo "</tr>";
-    		}
-			echo "</tbody>";
-		echo "</table>";
-	}
-
 	public function showImage()
 	{
     	$a=null;
@@ -184,7 +167,7 @@ class PixReader extends Pixpic {
                     if($this->span>1){$a.=$this->span;}else{$a.= "0";}
                     $a.="px;margin-bottom:";
                     if($this->span>1){$a.=$this->span;}else{$a.= "0";}
-                    $a.="px' title='(Y=$i - X=$j)'></div>";
+                    $a.="px' title='(Y=$i - X=$j - #$he)'></div>";
                     $he="";
                 }
             }
