@@ -26,7 +26,7 @@ $px->span=1;
 // 7) Hace que la imagen se vea pixelada
 // $px->imagePixelate();
 // 8) Invierte los colores en la imagen
-$px->imageNegate();
+// $px->imageNegate();
 
 
 $px->pixMoore();

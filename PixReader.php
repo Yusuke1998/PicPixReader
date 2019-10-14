@@ -49,24 +49,25 @@ class PixReader extends Pixpic {
 
     public function pixMoore()
     {
+        dd($this->imageArrPixel());
         // De izquierda a derecha, pixel a pixel:
         foreach ($this->imageArrPixel() as $i => $p) {
 
+            dd($p);
+
             // 4 vecinos verticales y horizontales, cuyas coordenadas son
-            //  (x,y-1); (x,y+1); (x-1,y); (x+1,y)
             //  Son llamados 4-vecinos de p, y se representan por N4(p).
+             // (x,y-1) [$p['X'],$p['Y']-1]
+             // (x,y+1) [$p['X'],$p['Y']+1]
+             // (x-1,y) [$p['X']-1,$p['Y']]
+             // (x+1,y) [$p['X']+1,$p['Y']]
+             
             // 4 vecinos diagonales, cuyas coordenadas son
-            //  (x-1,y-1); (x-1,y+1); (x+1,y-1); (x+1,y+1)
             //  Son representados por ND(p)
-            
-            // [$p['X'],$p['Y']-1],
-            // [$p['X'],$p['Y']+1],
-            // [$p['X']-1,$p['Y']],
-            // [$p['X']+1,$p['Y']],
-            // [$p['X']-1,$p['Y']-1],
-            // [$p['X']-1,$p['Y']+1],
-            // [$p['X']+1,$p['Y']-1],
-            // [$p['X']+1,$p['Y']+1]
+             // (x-1,y-1) [$p['X']-1,$p['Y']-1]
+             // (x-1,y+1) [$p['X']-1,$p['Y']+1]
+             // (x+1,y-1) [$p['X']+1,$p['Y']-1]
+             // (x+1,y+1) [$p['X']+1,$p['Y']+1]
         }
     }
 
