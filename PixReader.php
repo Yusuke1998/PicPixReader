@@ -47,28 +47,74 @@ class PixReader extends Pixpic {
         return $he;
     }
 
-    public function pixMoore()
-    {
-        dd($this->imageArrPixel());
-        // De izquierda a derecha, pixel a pixel:
-        foreach ($this->imageArrPixel() as $i => $p) {
+    public function image2Info(){
+        $a=array();
+        $x=imagesx($this->rs);$y=imagesy($this->rs);
+        $to=$x*$y;
+        for ($i = 0; $i < $x; $i++){
+            for ($j = 0; $j < $y; $j++) {
+                $pixelxy = imagecolorat($this->rs, $j, $i);
+                $rgb = imagecolorsforindex($this->rs, $pixelxy);
+                $r=dechex($rgb["red"]);
+                $g=dechex($rgb["green"]);
+                $b=dechex($rgb["blue"]);
+                if(strlen($r)==1){
+                    $he="0".$r;
+                }else{
+                    $he=$r;
+                }
+                if(strlen($g)==1){
+                    $he.="0".$g;
+                }else{
+                    $he.=$g;
+                }
+                if(strlen($b)==1){
+                    $he.="0".$b;
+                }else{
+                    $he.=$b;
+                }
 
-            dd($p);
-
-            // 4 vecinos verticales y horizontales, cuyas coordenadas son
-            //  Son llamados 4-vecinos de p, y se representan por N4(p).
-             // (x,y-1) [$p['X'],$p['Y']-1]
-             // (x,y+1) [$p['X'],$p['Y']+1]
-             // (x-1,y) [$p['X']-1,$p['Y']]
-             // (x+1,y) [$p['X']+1,$p['Y']]
-             
-            // 4 vecinos diagonales, cuyas coordenadas son
-            //  Son representados por ND(p)
-             // (x-1,y-1) [$p['X']-1,$p['Y']-1]
-             // (x-1,y+1) [$p['X']-1,$p['Y']+1]
-             // (x+1,y-1) [$p['X']+1,$p['Y']-1]
-             // (x+1,y+1) [$p['X']+1,$p['Y']+1]
+                if(!array_key_exists($he,$a)){              
+                    $a[$he]=array("c"=>$he,"n"=>1,"p"=>0);
+                }else{
+                    $a[$he]["n"]+=1;
+                    $a[$he]["p"]=round($a[$he]["n"]/$to,2);
+                }
+            }
         }
+        return $a;  
+    }
+
+    public function paintPixel($objeto,$fondo)
+    {
+        $mM = $this->minMax();
+        for ($i = 0; $i < imagesy($this->rs); $i++){
+            for ($j = 0; $j < imagesx($this->rs); $j++) {
+                $hex = $this->hexPixel($j,$i);
+                if ($hex == $mM['min']['c']) {
+                    imagesetpixel($this->rs,$j,$i,$objeto);
+                }elseif ($hex == $mM['max']['c']) {
+                    imagesetpixel($this->rs,$j,$i,$fondo);
+                }
+            }
+        }
+    }
+
+    public function minMax()
+    {
+        $imgInf = $this->image2Info();
+        $a = array_filter($imgInf,function($a){
+            if($a['p'] > 0){
+                return $a;
+            }
+        });
+        return array('min' => min($a),'max' => max($a));
+    }
+
+    public function pixTest()
+    {
+        $mM = $this->minMax();
+        echo $this->image2siluet($mM['min']['c']);
     }
 
     public function lineIdentifier(){
@@ -164,6 +210,7 @@ class PixReader extends Pixpic {
                     }else{
                         $he.=$b;
                     }
+
                     $a.= "<div style='position:static;float:left;width:".$this->zoom."px;height:".$this->zoom."px;background:#".$he.";top:".($j*$this->span*$this->zoom)."px;left:".($i*$this->span*$this->zoom)."px;margin-right:";
                     if($this->span>1){$a.=$this->span;}else{$a.= "0";}
                     $a.="px;margin-bottom:";
@@ -210,11 +257,6 @@ class PixReader extends Pixpic {
     	imagefilter($this->rs,IMG_FILTER_SELECTIVE_BLUR);
     }
 
-    public function imageMean(){
-
-    	imagefilter($this->rs,IMG_FILTER_MEAN_REMOVAL);
-    }
-
     public function imageSmooth($arg1=0){
 
     	imagefilter($this->rs,IMG_FILTER_SMOOTH,$arg1);
@@ -223,6 +265,26 @@ class PixReader extends Pixpic {
     public function imagePixelate($arg1=0){
 
     	imagefilter($this->rs,IMG_FILTER_PIXELATE,$arg1);
+    }
+
+    public function imageBrightnss($arg1=0){
+
+        imagefilter($this->rs,IMG_FILTER_BRIGHTNESS,$arg1);
+    }
+
+    public function imageContrast($arg1=0){
+
+        imagefilter($this->rs,IMG_FILTER_CONTRAST,$arg1);
+    }
+
+    public function imageColorize($arg1=0,$arg2=0,$arg3=0,$arg4=0){
+
+        imagefilter($this->rs,IMG_FILTER_COLORIZE,$arg1,$arg2,$arg3,$arg4);
+    }
+
+    public function imageMean(){
+
+        imagefilter($this->rs,IMG_FILTER_MEAN_REMOVAL);
     }
 
     public function imageNegate(){
@@ -243,5 +305,25 @@ class PixReader extends Pixpic {
 }
 
 
+
+
+
+
+
+#N4(P) -> (x+1,y),(x-1,y),(x,y+1),(x,y-1)
+#ND(p) -> (x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)
+#N8(p) -> ND(P)+N4(P)
+
+// 4 vecinos verticales y horizontales, se representan por N4(P).
+#(x,y-1) [$p['X'],$p['Y']-1]
+#(x,y+1) [$p['X'],$p['Y']+1]
+#(x-1,y) [$p['X']-1,$p['Y']]
+#(x+1,y) [$p['X']+1,$p['Y']]
+ 
+// 4 vecinos diagonales, son representados por ND(P)
+#(x-1,y-1) [$p['X']-1,$p['Y']-1]
+#(x-1,y+1) [$p['X']-1,$p['Y']+1]
+#(x+1,y-1) [$p['X']+1,$p['Y']-1]
+#(x+1,y+1) [$p['X']+1,$p['Y']+1]
 
 

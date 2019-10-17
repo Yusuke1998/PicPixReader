@@ -1,0 +1,5 @@
+Obtencion de imagen
+Escala de grises
+Esqueletizacion de imagen (alg. Zhang-Suen)
+Aplicacion de alg. de holt (norte-sur)
+Interpretacion de esqueletizacion
