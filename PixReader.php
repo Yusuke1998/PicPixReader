@@ -85,7 +85,7 @@ class PixReader extends Pixpic {
         return $a;  
     }
 
-    public function paintPixel($objeto,$fondo)
+    public function paintPixel($objeto,$fondo,$linea)
     {
         $mM = $this->minMax();
         for ($i = 0; $i < imagesy($this->rs); $i++){
@@ -95,6 +95,8 @@ class PixReader extends Pixpic {
                     imagesetpixel($this->rs,$j,$i,$objeto);
                 }elseif ($hex == $mM['max']['c']) {
                     imagesetpixel($this->rs,$j,$i,$fondo);
+                }else{
+                    imagesetpixel($this->rs,$j,$i,$linea);
                 }
             }
         }
@@ -113,8 +115,8 @@ class PixReader extends Pixpic {
 
     public function pixTest()
     {
-        $mM = $this->minMax();
-        echo $this->image2siluet($mM['min']['c']);
+        // $mM = $this->minMax();
+        // echo $this->image2siluet($mM['min']['c']);
     }
 
     public function lineIdentifier(){
