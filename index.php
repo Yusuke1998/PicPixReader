@@ -39,7 +39,5 @@ $px->paintPixel($white,$black,$black);
 $px->pixTest();
 
 
-
-
 $px->showImage();	
 $px->clearCache();
