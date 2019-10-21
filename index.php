@@ -3,17 +3,16 @@
 require 'PixReader.php';
 
 $px = new PixReader;
-$img = "img/saco.png";
+// $img = "img/star.png";
+$img = "img/cosa.png";
 
 $px->setImage($img);
 
-$px->zoom=5;
+$px->zoom=3;
 $px->span=1;
-$white = "16777215";
-$black = "0";
 
 // 1) Pasar imagen a escala de grises
-// $px->image2gray();
+$px->image2gray();
 // 2) Resalta los bordes de la imagen
 // $px->imageBorder();
 // 3) Desenfoca la imagen usando el método gaussiano
@@ -33,11 +32,11 @@ $black = "0";
 // 10) Cambia el contraste de la imagen
 // $px->imageContrast();
 // 11) Asignas colores, en orden rojo, verde, azul y alfa
-// $px->imageColorize(0,0,0);
+// $px->imageColorize(250,25,255);
 
-$px->paintPixel($white,$black,$black);
-$px->pixTest();
+$px->paintPixel(white,0,0);
 
+$px->Squeletation();
 
 $px->showImage();	
 $px->clearCache();

@@ -1,193 +1,35 @@
 <?php 
 
-require "tools/dd.php";
+require "src/Tools.php";
 require "vendor/autoload.php";
+ini_set('memory_limit', '1024M');
+const white = 16777215;
 
 class PixReader extends Pixpic {
-
-	private function imageArrPixel()
-    {
-    	$pixel=[];
-    	if($this->determineProper()){
-            for ($i = 0; $i < imagesy($this->rs); $i++){
-                for ($j = 0; $j < imagesx($this->rs); $j++) {
-                    $hex = $this->hexPixel($j,$i);
-		            $pixel[]=array('X'=>$j,'Y'=>$i,'H'=>$hex);
-                }
-            }
-            return $pixel;
-        }else{
-            return $this->error();
-        }
-    }
-
-    private function hexPixel($j,$i)
-    {
-        $pixelxy = imagecolorat($this->rs, $j, $i);
-        $rgb = imagecolorsforindex($this->rs, $pixelxy);
-        $r=dechex($rgb["red"]);
-        $g=dechex($rgb["green"]);
-        $b=dechex($rgb["blue"]);
-
-        if(strlen($r)==1){
-            $he="0".$r;
-        }else{
-            $he=$r;
-        }
-        if(strlen($g)==1){
-            $he.="0".$g;
-        }else{
-            $he.=$g;
-        }
-        if(strlen($b)==1){
-            $he.="0".$b;
-        }else{
-            $he.=$b;
-        }
-        return $he;
-    }
-
-    public function image2Info(){
-        $a=array();
-        $x=imagesx($this->rs);$y=imagesy($this->rs);
-        $to=$x*$y;
-        for ($i = 0; $i < $x; $i++){
-            for ($j = 0; $j < $y; $j++) {
-                $pixelxy = imagecolorat($this->rs, $j, $i);
-                $rgb = imagecolorsforindex($this->rs, $pixelxy);
-                $r=dechex($rgb["red"]);
-                $g=dechex($rgb["green"]);
-                $b=dechex($rgb["blue"]);
-                if(strlen($r)==1){
-                    $he="0".$r;
-                }else{
-                    $he=$r;
-                }
-                if(strlen($g)==1){
-                    $he.="0".$g;
-                }else{
-                    $he.=$g;
-                }
-                if(strlen($b)==1){
-                    $he.="0".$b;
-                }else{
-                    $he.=$b;
-                }
-
-                if(!array_key_exists($he,$a)){              
-                    $a[$he]=array("c"=>$he,"n"=>1,"p"=>0);
-                }else{
-                    $a[$he]["n"]+=1;
-                    $a[$he]["p"]=round($a[$he]["n"]/$to,2);
-                }
-            }
-        }
-        return $a;  
-    }
-
-    public function paintPixel($objeto,$fondo,$linea)
-    {
-        $mM = $this->minMax();
-        for ($i = 0; $i < imagesy($this->rs); $i++){
-            for ($j = 0; $j < imagesx($this->rs); $j++) {
-                $hex = $this->hexPixel($j,$i);
-                if ($hex == $mM['min']['c']) {
-                    imagesetpixel($this->rs,$j,$i,$objeto);
-                }elseif ($hex == $mM['max']['c']) {
-                    imagesetpixel($this->rs,$j,$i,$fondo);
-                }else{
-                    imagesetpixel($this->rs,$j,$i,$linea);
-                }
-            }
-        }
-    }
-
-    public function minMax()
-    {
-        $imgInf = $this->image2Info();
-        $a = array_filter($imgInf,function($a){
-            if($a['p'] > 0){
-                return $a;
-            }
-        });
-        return array('min' => min($a),'max' => max($a));
-    }
+    use Filtered, Helpers;
 
     public function p8()
     {
-
-    }
-
-    public function pixTest()
-    {
+        $vecindad=[];
         for ($y = 0; $y < imagesy($this->rs); $y++){
             for ($x = 0; $x < imagesx($this->rs); $x++) {
                 $px=[
-                    ["NO"   =>  [
-                                    "X"=>$x-1,
-                                    "Y"=>$y-1
-                                ]
-                    ],
-                    ["N"    =>  [
-                                    "X"=>$x-1,
-                                    "Y"=>$y
-                                ]
-                    ],
-                    ["NE"   =>  [
-                                    "X"=>$x-1,
-                                    "Y"=>$y+1
-                                ]
-                    ],
-                    ["O"    =>  [
-                                    "X"=>$x,
-                                    "Y"=>$y-1
-                                ]
-                    ],
-                    ["C"    =>  [
-                                    "X"=>$x,
-                                    "Y"=>$y
-                                ]
-                    ],
-                    ["E"    =>  [
-                                    "X"=>$x,
-                                    "Y"=>$y+1
-                                ]
-                    ],
-                    ["SO"   =>  [
-                                    "X"=>$x+1,
-                                    "Y"=>$y-1
-                                ]
-                    ],
-                    ["S"    =>  [
-                                    "X"=>$x+1,
-                                    "Y"=>$y
-                                ]
-                    ],
-                    ["SE"   =>  [
-                                    "X"=>$x+1,
-                                    "Y"=>$y+1
-                                ]
-                    ],
+                    ["P1/C"    =>  ["X"=>$x,"Y"=>$y]],
+                    ["P2/N"    =>  ["X"=>$x-1,"Y"=>$y]],
+                    ["P3/NE"   =>  ["X"=>$x-1,"Y"=>$y+1]],
+                    ["P4/E"    =>  ["X"=>$x,"Y"=>$y+1]],
+                    ["P5/SE"   =>  ["X"=>$x+1,"Y"=>$y+1]],
+                    ["P6/S"    =>  ["X"=>$x+1,"Y"=>$y]],
+                    ["P7/SO"   =>  ["X"=>$x+1,"Y"=>$y-1]],
+                    ["P8/O"    =>  ["X"=>$x,"Y"=>$y-1]],
+                    ["P9/NO"   =>  ["X"=>$x-1,"Y"=>$y-1]],
                 ];
+
+                array_push($vecindad, $px);
             }
         }
 
-        dd($px);
-        
-        /**
-        // 4 vecinos verticales y horizontales, se representan por N4(P).
-        [$p['X'],$p['Y']-1] #(x,y-1)
-        [$p['X'],$p['Y']+1] #(x,y+1)
-        [$p['X']-1,$p['Y']] #(x-1,y)
-        [$p['X']+1,$p['Y']] #(x+1,y)
-         
-        // 4 vecinos diagonales, son representados por ND(P)
-        [$p['X']-1,$p['Y']-1] #(x-1,y-1)
-        [$p['X']-1,$p['Y']+1] #(x-1,y+1)
-        [$p['X']+1,$p['Y']-1] #(x+1,y-1)
-        [$p['X']+1,$p['Y']+1] #(x+1,y+1)
-        **/
-
+        dd($vecindad,true);
     }
 
     public function lineIdentifier(){
@@ -256,149 +98,10 @@ class PixReader extends Pixpic {
         echo "Forma: $forma";
     }
 
-    public function showImage()
+
+
+    public function Test()
     {
-        $a=null;
-        if($this->determineProper()){
-            for ($i = 0; $i < imagesy($this->rs); $i++){
-                for ($j = 0; $j < imagesx($this->rs); $j++) {
-                    $pixelxy = imagecolorat($this->rs, $j, $i);
-                    $rgb = imagecolorsforindex($this->rs, $pixelxy);
-                    
-                    $r=dechex($rgb["red"]);
-                    $g=dechex($rgb["green"]);
-                    $b=dechex($rgb["blue"]);
-                    if(strlen($r)==1){
-                        $he="0".$r;
-                    }else{
-                        $he=$r;
-                    }
-                    if(strlen($g)==1){
-                        $he.="0".$g;
-                    }else{
-                        $he.=$g;
-                    }
-                    if(strlen($b)==1){
-                        $he.="0".$b;
-                    }else{
-                        $he.=$b;
-                    }
-
-                    $a.= "<div style='position:static;float:left;width:".$this->zoom."px;height:".$this->zoom."px;background:#".$he.";top:".($j*$this->span*$this->zoom)."px;left:".($i*$this->span*$this->zoom)."px;margin-right:";
-                    if($this->span>1){$a.=$this->span;}else{$a.= "0";}
-                    $a.="px;margin-bottom:";
-                    if($this->span>1){$a.=$this->span;}else{$a.= "0";}
-                    $a.="px' title='(Y=$i - X=$j - #$he)'></div>";
-                    $he="";
-                }
-            }
-            if($this->zoom>1){
-                if ($this->span>1){
-                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->zoom+$this->span)."px;width:".imagesx($this->rs)*($this->zoom+$this->span)."px;'>".$a."</div>";
-                }else{
-                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->zoom)."px;width:".imagesx($this->rs)*($this->zoom)."px;'>".$a."</div>";
-                }
-            }else{
-                if ($this->span>1){
-                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)*($this->span+1)."px;width:".imagesx($this->rs)*($this->span+1)."px;'>".$a."</div>";
-                }else{
-                    echo "<div class='imgPixpic' style='height:".imagesy($this->rs)."px;width:".imagesx($this->rs)."px;'>".$a."</div>";
-                }
-            }
-        }else{
-            return $this->error();
-        }
+        return "nada!";
     }
-
-    public function image2gray(){
-
-        imagefilter($this->rs,IMG_FILTER_GRAYSCALE);
-    }
-
-    public function imageBorder(){
-
-        imagefilter($this->rs,IMG_FILTER_EDGEDETECT);
-    }
-
-    public function imageGaussian(){
-
-        imagefilter($this->rs,IMG_FILTER_GAUSSIAN_BLUR);
-    }
-
-    public function imageSelective(){
-
-        imagefilter($this->rs,IMG_FILTER_SELECTIVE_BLUR);
-    }
-
-    public function imageSmooth($arg1=0){
-
-        imagefilter($this->rs,IMG_FILTER_SMOOTH,$arg1);
-    }
-
-    public function imagePixelate($arg1=0){
-
-        imagefilter($this->rs,IMG_FILTER_PIXELATE,$arg1);
-    }
-
-    public function imageBrightnss($arg1=0){
-
-        imagefilter($this->rs,IMG_FILTER_BRIGHTNESS,$arg1);
-    }
-
-    public function imageContrast($arg1=0){
-
-        imagefilter($this->rs,IMG_FILTER_CONTRAST,$arg1);
-    }
-
-    public function imageColorize($arg1=0,$arg2=0,$arg3=0,$arg4=0){
-
-        imagefilter($this->rs,IMG_FILTER_COLORIZE,$arg1,$arg2,$arg3,$arg4);
-    }
-
-    public function imageMean(){
-
-        imagefilter($this->rs,IMG_FILTER_MEAN_REMOVAL);
-    }
-
-    public function imageNegate(){
-
-        imagefilter($this->rs,IMG_FILTER_NEGATE);
-    }
-
-    public function saveImage($name='img_',$path = 'img/',$ext = 'png')
-    {
-        $ruta = $path.$name.time().".$ext";
-        return imagegd2($this->rs,$ruta);
-    }
-
-    public function clearCache()
-    {
-        return imagedestroy($this->rs);
-    } 
 }
-
-
-
-
-
-
-
-#N4(P) -> (x+1,y),(x-1,y),(x,y+1),(x,y-1)
-#ND(p) -> (x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)
-#N8(p) -> ND(P)+N4(P)
-
-// 4 vecinos verticales y horizontales, se representan por N4(P).
-#(x,y-1) [$p['X'],$p['Y']-1]
-#(x,y+1) [$p['X'],$p['Y']+1]
-#(x-1,y) [$p['X']-1,$p['Y']]
-#(x+1,y) [$p['X']+1,$p['Y']]
- 
-// 4 vecinos diagonales, son representados por ND(P)
-#(x-1,y-1) [$p['X']-1,$p['Y']-1]
-#(x-1,y+1) [$p['X']-1,$p['Y']+1]
-#(x+1,y-1) [$p['X']+1,$p['Y']-1]
-#(x+1,y+1) [$p['X']+1,$p['Y']+1]
-
-
-// $mM = $this->minMax();
-// echo $this->image2siluet($mM['min']['c']);
