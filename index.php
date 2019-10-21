@@ -3,8 +3,7 @@
 require 'PixReader.php';
 
 $px = new PixReader;
-// $img = "img/star.png";
-$img = "img/cosa.png";
+$img = "img/saco.png";
 
 $px->setImage($img);
 
@@ -32,11 +31,16 @@ $px->image2gray();
 // 10) Cambia el contraste de la imagen
 // $px->imageContrast();
 // 11) Asignas colores, en orden rojo, verde, azul y alfa
-// $px->imageColorize(250,25,255);
+// $px->imageColorize(0,0,0);
 
 $px->paintPixel(white,0,0);
 
-$px->Squeletation();
+// $px->squelettisation();
 
-$px->showImage();	
+$px->Test2();
+
+$px->showImage();
+
+// $px->saveImage();
+
 $px->clearCache();

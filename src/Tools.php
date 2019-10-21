@@ -147,10 +147,10 @@ trait Helpers
     {
     	$pixel=[];
     	if($this->determineProper()){
-            for ($y = 0; $y < imagesy($this->rs); $i++){
+            for ($y = 0; $y < imagesy($this->rs); $y++){
                 for ($x = 0; $x < imagesx($this->rs); $x++) {
-                    $hex = $this->hexPixel($x,$i);
-		            $pixel[]=array('x'=>$j,'y'=>$i,'h'=>$hex);
+                    $hex = $this->hexPixel($x,$y);
+		            $pixel[]=array('x'=>$x,'y'=>$y,'h'=>$hex);
                 }
             }
             return $pixel;
@@ -161,7 +161,7 @@ trait Helpers
 
     public function colBin($p)
     {
-        $b = ($this->hexPixel($p['x'],$p['y']) == 'ffffff')?1:0;
+        $b = ($this->hexPixel($p['x'],$p['y']) === 'ffffff')?1:0;
         return $b;
     }
 
@@ -171,7 +171,7 @@ trait Helpers
         return false;
     }
 
-    public function iterSkeletation($re)
+    public function iterSquelettisation($re)
     {
         for ($y = 0; $y < imagesy($this->rs)-1; $y++){
             for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
@@ -206,10 +206,10 @@ trait Helpers
         }
     }
 
-    public function Squeletation()
+    public function squelettisation()
     {
-        $this->iterSkeletation(0);
-        $this->iterSkeletation(1);
+        $this->iterSquelettisation(0);
+        $this->iterSquelettisation(1);
     }
 
     public function image2Info(){
@@ -221,24 +221,23 @@ trait Helpers
                 $pixelxy = imagecolorat($this->rs, $j, $i);
                 $rgb = imagecolorsforindex($this->rs, $pixelxy);
                 $r=dechex($rgb["red"]);
-                $g=dechex($rgb["green"]);
-                $b=dechex($rgb["blue"]);
-                if(strlen($r)==1){
-                    $he="0".$r;
-                }else{
-                    $he=$r;
-                }
-                if(strlen($g)==1){
-                    $he.="0".$g;
-                }else{
-                    $he.=$g;
-                }
-                if(strlen($b)==1){
-                    $he.="0".$b;
-                }else{
-                    $he.=$b;
-                }
-
+                    $g=dechex($rgb["green"]);
+                    $b=dechex($rgb["blue"]);
+                    if(strlen($r)==1){
+                        $he="0".$r;
+                    }else{
+                        $he=$r;
+                    }
+                    if(strlen($g)==1){
+                        $he.="0".$g;
+                    }else{
+                        $he.=$g;
+                    }
+                    if(strlen($b)==1){
+                        $he.="0".$b;
+                    }else{
+                        $he.=$b;
+                    }
                 if(!array_key_exists($he,$a)){              
                     $a[$he]=array("c"=>$he,"n"=>1,"p"=>0);
                 }else{
@@ -247,24 +246,7 @@ trait Helpers
                 }
             }
         }
-        return $a;  
-    }
-
-    public function paintPixel($objeto='16777215',$fondo='0',$linea='255')
-    {
-        $mM = $this->minMax();
-        for ($i = 0; $i < imagesy($this->rs); $i++){
-            for ($j = 0; $j < imagesx($this->rs); $j++) {
-                $hex = $this->hexPixel($j,$i);
-                if ($hex == $mM['min']['c']) {
-                    imagesetpixel($this->rs,$j,$i,$objeto);
-                }elseif ($hex == $mM['max']['c']) {
-                    imagesetpixel($this->rs,$j,$i,$fondo);
-                }else{
-                    imagesetpixel($this->rs,$j,$i,$linea);
-                }
-            }
-        }
+        return $a;
     }
 
     public function minMax()
@@ -276,12 +258,53 @@ trait Helpers
             }
         });
         return array('min' => min($a),'max' => max($a));
+        // if (count($a)>0)return array('min' => min($a),'max' => max($a));
     }
 
-    public function saveImage($name='img_',$path = 'img/',$ext = 'png')
+    public function paintPixel($objeto='16777215',$fondo='0',$linea='255')
     {
-        $ruta = $path.$name.time().".$ext";
-        return imagegd2($this->rs,$ruta);
+        $mM = $this->minMax();
+        for ($y = 0; $y < imagesy($this->rs); $y++){
+            for ($x = 0; $x < imagesx($this->rs); $x++) {
+                $hex = $this->hexPixel($x,$y);
+                if ($hex === $mM['min']['c']) {
+                    imagesetpixel($this->rs,$x,$y,$objeto);
+                }elseif ($hex === $mM['max']['c']) {
+                    imagesetpixel($this->rs,$x,$y,$fondo);
+                }else{
+                    imagesetpixel($this->rs,$x,$y,$linea);
+                }
+            }
+        }
+    }
+
+    public function p8()
+    {
+        $vecindad=[];
+        for ($y = 0; $y < imagesy($this->rs); $y++){
+            for ($x = 0; $x < imagesx($this->rs); $x++) {
+                $px=[
+                    ["P1/C"    =>  ["X"=>$x,"Y"=>$y]],
+                    ["P2/N"    =>  ["X"=>$x-1,"Y"=>$y]],
+                    ["P3/NE"   =>  ["X"=>$x-1,"Y"=>$y+1]],
+                    ["P4/E"    =>  ["X"=>$x,"Y"=>$y+1]],
+                    ["P5/SE"   =>  ["X"=>$x+1,"Y"=>$y+1]],
+                    ["P6/S"    =>  ["X"=>$x+1,"Y"=>$y]],
+                    ["P7/SO"   =>  ["X"=>$x+1,"Y"=>$y-1]],
+                    ["P8/O"    =>  ["X"=>$x,"Y"=>$y-1]],
+                    ["P9/NO"   =>  ["X"=>$x-1,"Y"=>$y-1]],
+                ];
+
+                array_push($vecindad, $px);
+            }
+        }
+        dd($vecindad,true);
+    }
+
+    public function saveImage($name='img_',$path = '.\img\\',$ext = '.png')
+    {
+        $FileName = $path.date('d-m-Y').$ext;
+        return imagepng($this->rs,$FileName);
     }
 
     public function clearCache()

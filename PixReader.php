@@ -1,36 +1,8 @@
 <?php 
-
-require "src/Tools.php";
-require "vendor/autoload.php";
-ini_set('memory_limit', '1024M');
-const white = 16777215;
+require_once "src/Conf.php";
 
 class PixReader extends Pixpic {
     use Filtered, Helpers;
-
-    public function p8()
-    {
-        $vecindad=[];
-        for ($y = 0; $y < imagesy($this->rs); $y++){
-            for ($x = 0; $x < imagesx($this->rs); $x++) {
-                $px=[
-                    ["P1/C"    =>  ["X"=>$x,"Y"=>$y]],
-                    ["P2/N"    =>  ["X"=>$x-1,"Y"=>$y]],
-                    ["P3/NE"   =>  ["X"=>$x-1,"Y"=>$y+1]],
-                    ["P4/E"    =>  ["X"=>$x,"Y"=>$y+1]],
-                    ["P5/SE"   =>  ["X"=>$x+1,"Y"=>$y+1]],
-                    ["P6/S"    =>  ["X"=>$x+1,"Y"=>$y]],
-                    ["P7/SO"   =>  ["X"=>$x+1,"Y"=>$y-1]],
-                    ["P8/O"    =>  ["X"=>$x,"Y"=>$y-1]],
-                    ["P9/NO"   =>  ["X"=>$x-1,"Y"=>$y-1]],
-                ];
-
-                array_push($vecindad, $px);
-            }
-        }
-
-        dd($vecindad,true);
-    }
 
     public function lineIdentifier(){
         $pixel = $this->imageArrPixel();
@@ -43,13 +15,13 @@ class PixReader extends Pixpic {
         foreach ($pixel as $key => $value) {
             if ($inicial) {
             // Valores iniciales de 'x' y 'y'
-                $xi = $pixel[$key]['X'];
-                $yi = $pixel[$key]['Y'];
+                $xi = $pixel[$key]['x'];
+                $yi = $pixel[$key]['y'];
                 $inicial = false;
             }
             // Valores finales de 'x' y 'y'
-            $xf = $pixel[$key]['X'];
-            $yf = $pixel[$key]['Y'];
+            $xf = $pixel[$key]['x'];
+            $yf = $pixel[$key]['y'];
         }
         // Diferenciales
         $dx = $xf-$xi;
@@ -98,10 +70,78 @@ class PixReader extends Pixpic {
         echo "Forma: $forma";
     }
 
-
-
     public function Test()
     {
-        return "nada!";
+        $camino = [];
+        for ($y = 0; $y < imagesy($this->rs)-1; $y++){
+            for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
+
+                $p1 = ["n"=>"p1","x"=>$x, "y"=>$y, "h"=>''];
+                $p2 = ["n"=>"p2","x"=>$x - 1, "y"=>$y, "h"=>''];
+                $p3 = ["n"=>"p3","x"=>$x - 1, "y"=>$y + 1, "h"=>''];
+                $p4 = ["n"=>"p4","x"=>$x, "y"=>$y + 1, "h"=>''];
+                $p5 = ["n"=>"p5","x"=>$x + 1, "y"=>$y + 1, "h"=>''];
+                $p6 = ["n"=>"p6","x"=>$x + 1, "y"=>$y, "h"=>''];
+                $p7 = ["n"=>"p7","x"=>$x + 1, "y"=>$y - 1, "h"=>''];
+                $p8 = ["n"=>"p8","x"=>$x, "y"=>$y - 1, "h"=>''];
+                $p9 = ["n"=>"p9","x"=>$x - 1, "y"=>$y - 1, "h"=>''];
+
+                if ($this->positive($p1)&&$this->positive($p2)&&$this->positive($p3)&&
+                    $this->positive($p4)&&$this->positive($p5)&&$this->positive($p6)&&
+                    $this->positive($p7)&&$this->positive($p8))
+                {
+                    $p1["h"]=$this->hexPixel($x,$y);
+                    $p2["h"]=$this->hexPixel($x-1,$y);
+                    $p3["h"]=$this->hexPixel($x-1,$y+1);
+                    $p4["h"]=$this->hexPixel($x,$y+1);
+                    $p5["h"]=$this->hexPixel($x+1,$y+1);
+                    $p6["h"]=$this->hexPixel($x+1,$y);
+                    $p7["h"]=$this->hexPixel($x+1,$y-1);
+                    $p8["h"]=$this->hexPixel($x,$y-1);
+                    $p9["h"]=$this->hexPixel($x-1,$y-1);
+
+                    switch ($p1) {
+                        case $p1['h']=='ffffff'&&$p1['h']==$p2['h']:
+                            array_push($camino,$p2);
+                            break;
+                        case $p1['h']=='ffffff'&&$p1['h']==$p3['h']:
+                            array_push($camino,$p3);
+                            break;
+                        case $p1['h']=='ffffff'&&$p1['h']==$p4['h']:
+                            array_push($camino,$p4);
+                            break;
+                        case $p1['h']=='ffffff'&&$p1['h']==$p5['h']:
+                            array_push($camino,$p5);
+                            break;
+                        case $p1['h']=='ffffff'&&$p1['h']==$p6['h']:
+                            array_push($camino,$p6);
+                            break;
+                        case $p1['h']=='ffffff'&&$p1['h']==$p7['h']:
+                            array_push($camino,$p7);
+                            break;
+                        case $p1['h']=='ffffff'&&$p1['h']==$p8['h']:
+                            array_push($camino,$p8);
+                            break;
+                        case $p1['h']=='ffffff'&&$p1['h']==$p9['h']:
+                            array_push($camino,$p9);
+                            break;
+                        // default:
+                        //     dd($p1);
+                        //     break;
+                    }
+                }
+            }
+        }
+        dd($camino,true);
+    }
+
+    public function Test2()
+    {
+        $width=imagesx($this->rs);$heigth=imagesy($this->rs);
+        for ($y = 0; $y < $heigth; $y++){
+            for ($x = 0; $x < $width; $x++) {
+
+            }
+        }
     }
 }
