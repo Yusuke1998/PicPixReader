@@ -1,5 +1,7 @@
-Obtencion de imagen
-Escala de grises
-Esqueletizacion de imagen (alg. Zhang-Suen)
-Aplicacion de alg. de holt (norte-sur)
-Interpretacion de esqueletizacion
+1 -Binarizar imagen
+2 -Segmentar
+3 -Esqueletizar
+3.1 -Usar algoritmo de Zhang-Suen
+3.2 -Usar algoritmo de holt
+4 -Reconocimiento
+4.1 -Emplear distancia euclidiana

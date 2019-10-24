@@ -37,8 +37,6 @@ $px->paintPixel(white,0,0);
 
 // $px->squelettisation();
 
-$px->Test2();
-
 $px->showImage();
 
 // $px->saveImage();
