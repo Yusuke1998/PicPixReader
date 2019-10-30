@@ -143,9 +143,13 @@ trait Helpers
         return $he;
     }
 
+    public function intPixel($x,$y)
+    {
+        return imagecolorat($this->rs, $x, $y);
+    }
+
     public function imageArrPixel()
     {
-    	$pixel=[];
     	if($this->determineProper()){
             for ($y = 0; $y < imagesy($this->rs); $y++){
                 for ($x = 0; $x < imagesx($this->rs); $x++) {
@@ -264,6 +268,9 @@ trait Helpers
     public function paintPixel($objeto='16777215',$fondo='0',$linea='255')
     {
         $mM = $this->minMax();
+        
+        dd($mM);
+
         for ($y = 0; $y < imagesy($this->rs); $y++){
             for ($x = 0; $x < imagesx($this->rs); $x++) {
                 $hex = $this->hexPixel($x,$y);
@@ -276,29 +283,6 @@ trait Helpers
                 }
             }
         }
-    }
-
-    public function p8()
-    {
-        $vecindad=[];
-        for ($y = 0; $y < imagesy($this->rs); $y++){
-            for ($x = 0; $x < imagesx($this->rs); $x++) {
-                $px=[
-                    ["P1/C"    =>  ["X"=>$x,"Y"=>$y]],
-                    ["P2/N"    =>  ["X"=>$x-1,"Y"=>$y]],
-                    ["P3/NE"   =>  ["X"=>$x-1,"Y"=>$y+1]],
-                    ["P4/E"    =>  ["X"=>$x,"Y"=>$y+1]],
-                    ["P5/SE"   =>  ["X"=>$x+1,"Y"=>$y+1]],
-                    ["P6/S"    =>  ["X"=>$x+1,"Y"=>$y]],
-                    ["P7/SO"   =>  ["X"=>$x+1,"Y"=>$y-1]],
-                    ["P8/O"    =>  ["X"=>$x,"Y"=>$y-1]],
-                    ["P9/NO"   =>  ["X"=>$x-1,"Y"=>$y-1]],
-                ];
-
-                array_push($vecindad, $px);
-            }
-        }
-        dd($vecindad,true);
     }
 
     public function saveImage($name='img_',$path = '.\img\\',$ext = '.png')
