@@ -4,7 +4,7 @@ require 'PixReader.php';
 
 $px = new PixReader;
 
-$img = "img/cuadrado.png";
+$img = "img/escalera.png";
 
 $px->setImage($img);
 

@@ -11,7 +11,7 @@ class PixReader extends Pixpic {
         $label=[];
         for ($y = 0; $y < imagesy($this->rs)-1; $y++){
             for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
-                
+
                 if ($x>0 && $y>0)
                 {
                     $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
@@ -24,25 +24,26 @@ class PixReader extends Pixpic {
                     if ($current['h'] === 'ffffff') {
 
                         if ($top['h']==='000000' && $left['h'] === '000000') {
+                        #si arriba y a la izquierda es negro (nuevo cluster)
 
-                            $count_clusters+=1;
+                            if ($topne['h'] === 'ffffff') {
+                                array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$label)]);
+                            }else{
+                                $count_clusters+=1;
+                                array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
+                            }
                             
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
                         
-                        }elseif($left['h']==='000000' && $topne['h'] === 'ffffff') { #arriba al noreste es banco pero arriba e izquierda son negro
-
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$label)]);
-                        
-                        }elseif($top['h']==='000000' && $left['h'] === 'ffffff') { #si izquierda es blanco
-                        
+                        }elseif($left['h'] === 'ffffff' && $top['h']==='000000') { 
+                        #si izquierda es blanco
                             array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$label)]);
                         
-                        }elseif ($top['h']==='ffffff' && $left['h'] === '000000') { #si arriba es blanco
-
+                        }elseif ($top['h']==='ffffff' && $left['h'] === '000000') { 
+                        #si arriba es blanco
                             array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$label)]);
                         
-                        }else{ #si ambos son blancos
-                            
+                        }else{ 
+                        #si ambos son blancos
                             array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$label)]);
 
                         }
@@ -92,28 +93,32 @@ class PixReader extends Pixpic {
 
     public function showClusters($labels)
     {
-        foreach ($labels as $i => $label) {
-
-            echo "x-".$label['x']." y-".$label['y']." c-".$label['c']."<br>";            
+        foreach ($labels as $label) {
+            echo "x-".$label['x']." y-".$label['y']." c-".$label['c']."<br>";
         }
     }
 
     public function paintClusters($labels)
     {
         foreach ($labels as $label) {
-
             switch ($label['c']) {
                 case 1:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],255);
+                    imagesetpixel($this->rs,$label['x'],$label['y'],lightblue);
                     break;
                 case 2:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],16711935);
+                    imagesetpixel($this->rs,$label['x'],$label['y'],green);
                     break;
                 case 3:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],16776960);
+                    imagesetpixel($this->rs,$label['x'],$label['y'],yellow);
+                    break;
+                case 4:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],magenta);
+                    break;
+                case 5:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],blue);
                     break;
                 default:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],16711680);
+                    imagesetpixel($this->rs,$label['x'],$label['y'],red);
                     break;
             }
         }
@@ -121,8 +126,10 @@ class PixReader extends Pixpic {
 
     public function last($labels)
     {
+        $c=null;
         foreach ($labels as $label) {
-            return $label['c'];
+            $c = $label['c'];
         }
+        return $c;
     }
 }
