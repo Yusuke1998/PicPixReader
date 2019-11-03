@@ -216,7 +216,8 @@ trait Helpers
         $this->iterSquelettisation(1);
     }
 
-    public function image2Info(){
+    public function image2Info()
+    {
         $a=array();
         $x=imagesx($this->rs);$y=imagesy($this->rs);
         $to=$x*$y;
@@ -225,23 +226,23 @@ trait Helpers
                 $pixelxy = imagecolorat($this->rs, $j, $i);
                 $rgb = imagecolorsforindex($this->rs, $pixelxy);
                 $r=dechex($rgb["red"]);
-                    $g=dechex($rgb["green"]);
-                    $b=dechex($rgb["blue"]);
-                    if(strlen($r)==1){
-                        $he="0".$r;
-                    }else{
-                        $he=$r;
-                    }
-                    if(strlen($g)==1){
-                        $he.="0".$g;
-                    }else{
-                        $he.=$g;
-                    }
-                    if(strlen($b)==1){
-                        $he.="0".$b;
-                    }else{
-                        $he.=$b;
-                    }
+                $g=dechex($rgb["green"]);
+                $b=dechex($rgb["blue"]);
+                if(strlen($r)==1){
+                    $he="0".$r;
+                }else{
+                    $he=$r;
+                }
+                if(strlen($g)==1){
+                    $he.="0".$g;
+                }else{
+                    $he.=$g;
+                }
+                if(strlen($b)==1){
+                    $he.="0".$b;
+                }else{
+                    $he.=$b;
+                }
                 if(!array_key_exists($he,$a)){              
                     $a[$he]=array("c"=>$he,"n"=>1,"p"=>0);
                 }else{
@@ -262,15 +263,11 @@ trait Helpers
             }
         });
         return array('min' => min($a),'max' => max($a));
-        // if (count($a)>0)return array('min' => min($a),'max' => max($a));
     }
 
     public function paintPixel($objeto='16777215',$fondo='0',$linea='255')
     {
         $mM = $this->minMax();
-        
-        dd($mM);
-
         for ($y = 0; $y < imagesy($this->rs); $y++){
             for ($x = 0; $x < imagesx($this->rs); $x++) {
                 $hex = $this->hexPixel($x,$y);
