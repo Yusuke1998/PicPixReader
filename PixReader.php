@@ -8,7 +8,7 @@ class PixReader extends Pixpic {
     public function Clustering() #Aun le falta, tiene fallas
     {
         $count_clusters=0;
-        $label=[];
+        $labels=[];
         for ($y = 0; $y < imagesy($this->rs)-1; $y++){
             for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
 
@@ -27,38 +27,38 @@ class PixReader extends Pixpic {
                         #si arriba y a la izquierda es negro (posible nuevo cluster)
 
                             if ($topne['h'] === 'ffffff') { #escalera de un pixel, si arriba al noreste es blanco, se pertece a ese cluster
-                                array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$label)]);
+                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$labels)]);
                             }else{ #nuevo cluster
                                 $count_clusters+=1;
-                                array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
+                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
                             }
                             
                         
                         }elseif($left['h'] === 'ffffff' && $top['h']==='000000') { 
                         #si izquierda es blanco
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$label)]);
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$labels)]);
                         
                         }elseif ($top['h']==='ffffff' && $left['h'] === '000000') { 
                         #si arriba es blanco
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$label)]);
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$labels)]);
                         
                         }else{ 
                         #si ambos son blancos
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$label)]);
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$labels)]);
 
                         }
                     }
                 }
             }
         }
-        $this->paintClusters($label);
+        $this->paintClusters($labels);
     }
 
     public function Test()
     {
         $count_clusters=0;
-        $label=[];
-        $equal=[];
+        $labels=[];
+        $equals=[];
         for ($y = 0; $y < imagesy($this->rs)-1; $y++){
             for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
 
@@ -77,31 +77,42 @@ class PixReader extends Pixpic {
 
                             if ($topne['h'] === 'ffffff') { 
 
-                                array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$label)]);
+                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$labels)]);
                             }else{
 
                                 $count_clusters+=1;
-                                array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
+                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
                             }
                         
                         }elseif($left['h'] === 'ffffff' && $top['h']==='000000') { 
 
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$label)]);
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$labels)]);
                         
                         }elseif ($top['h']==='ffffff' && $left['h'] === '000000') { 
 
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$label)]);
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$labels)]);
                         }else{
-                            array_push($label,  ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$label)]);
+                            array_push($equals, ['x'=>$x,'y'=>$y,'ct'=>$this->find($top,$labels),'cl'=>$this->find($left,$labels)]);
+                            array_push($labels, ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$labels)]);
                         }
                     }
                 }
             }
         }
 
+        foreach ($labels as $label) {
+            foreach ($equals as $equal) {
+                if ($label['x'] == $equal['x'] &&  $label['y'] == $equal['y']) {
+                    $c = min($equal['ct'],$equal['cl']);
+                    $label['c'] = $c;
+                }
+            }
+        }
+
         // $this->showClusters($label);
-        $this->paintClusters($label);
+        $this->paintClusters($labels);
     }
+
 
     public function find($position,$labels)
     {
@@ -131,6 +142,18 @@ class PixReader extends Pixpic {
             return $clTop;
         }else{
             return $clLeft;
+        }
+    }
+
+    public function equal($top,$left,$labels)
+    {
+        $cT = $this->find($top,$labels);
+        $cL = $this->find($left,$labels);
+
+        if ($cT != $cL) {
+            return max($cT,$cL);
+        }else{
+            return $cT;
         }
     }
 
@@ -197,12 +220,4 @@ class PixReader extends Pixpic {
         }
     }
 
-    public function last($labels)
-    {
-        $c=null;
-        foreach ($labels as $label) {
-            $c = $label['c'];
-        }
-        return $c;
-    }
 }
