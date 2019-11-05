@@ -92,27 +92,19 @@ class PixReader extends Pixpic {
 
                             array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$labels)]);
                         }else{
-                            array_push($equals, ['x'=>$x,'y'=>$y,'ct'=>$this->find($top,$labels),'cl'=>$this->find($left,$labels)]);
                             array_push($labels, ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$labels)]);
+
+                            array_push($equals, ['x'=>$x,'y'=>$y,'ct'=>$this->find($top,$labels),'cl'=>$this->find($left,$labels)]);
                         }
                     }
                 }
             }
         }
 
-        foreach ($labels as $label) {
-            foreach ($equals as $equal) {
-                if ($label['x'] == $equal['x'] &&  $label['y'] == $equal['y']) {
-                    $c = min($equal['ct'],$equal['cl']);
-                    $label['c'] = $c;
-                }
-            }
-        }
+        // $this->showClusters($labels);
 
-        // $this->showClusters($label);
         $this->paintClusters($labels);
     }
-
 
     public function find($position,$labels)
     {
@@ -132,7 +124,8 @@ class PixReader extends Pixpic {
             if ($label['x'] == $left['x'] && $label['y'] == $left['y']) {
                 $cLeft +=1;
                 $clLeft = $this->find($left,$labels);
-            }elseif ($label['x'] == $top['x'] && $label['y'] == $top['y']) {
+            }
+            if ($label['x'] == $top['x'] && $label['y'] == $top['y']) {
                 $cTop  +=1;
                 $clTop  = $this->find($top,$labels);
             }
@@ -151,7 +144,7 @@ class PixReader extends Pixpic {
         $cL = $this->find($left,$labels);
 
         if ($cT != $cL) {
-            return max($cT,$cL);
+            return min($cT,$cL);
         }else{
             return $cT;
         }
@@ -184,7 +177,7 @@ class PixReader extends Pixpic {
                     imagesetpixel($this->rs,$label['x'],$label['y'],blue3);
                     break;
                 case 6:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],cian);
+                    imagesetpixel($this->rs,$label['x'],$label['y'],green2);
                     break;
                 case 7:
                     imagesetpixel($this->rs,$label['x'],$label['y'],red3);
@@ -205,7 +198,7 @@ class PixReader extends Pixpic {
                     imagesetpixel($this->rs,$label['x'],$label['y'],blue);
                     break;
                 case 13:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],green2);
+                    imagesetpixel($this->rs,$label['x'],$label['y'],cian);
                     break;
                 case 14:
                     imagesetpixel($this->rs,$label['x'],$label['y'],gray2);

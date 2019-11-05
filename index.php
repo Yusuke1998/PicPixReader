@@ -3,7 +3,7 @@
 require 'PixReader.php';
 // dd(gd_info());
 
-$img = "img/cuadrados.png";
+$img = "img/lol.png";
 // $img = "img/pro.png";
 $px = new PixReader;
 $px->setImage($img);
@@ -15,9 +15,7 @@ $px->span=1;
 // $px->paintPixel(white,0,0);
 // $px->squelettisation();
 
-$px->Clustering();
-
-// $px->Test();
+$px->Test();
 
 $px->showImage();
 // $px->saveImage();
