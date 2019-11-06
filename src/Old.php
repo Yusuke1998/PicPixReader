@@ -209,4 +209,77 @@
         dd($cluster,1);
     }
 
+
+        public function ClusteringOld() #Aun le falta, tiene fallas
+    {
+        $count_clusters=0;
+        $labels=[];
+        for ($y = 0; $y < imagesy($this->rs)-1; $y++){
+            for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
+
+                if ($x>0 && $y>0)
+                {
+                    $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
+                    $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
+                    $topne      = ["x"=>$x+1, "y"=>$y-1, "h"=>$this->hexPixel($x+1,$y-1)]; #top noreste
+                    $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
+                    $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
+                    $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
+
+                    if ($current['h'] === 'ffffff') {
+
+                        if ($top['h']==='000000' && $left['h'] === '000000') {
+                        #si arriba y a la izquierda es negro (posible nuevo cluster)
+
+                            if ($topne['h'] === 'ffffff') { #escalera de un pixel, si arriba al noreste es blanco, se pertece a ese cluster
+                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$labels)]);
+                            }else{ #nuevo cluster
+                                $count_clusters+=1;
+                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
+                            }
+                            
+                        
+                        }elseif($left['h'] === 'ffffff' && $top['h']==='000000') { 
+                        #si izquierda es blanco
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$labels)]);
+                        
+                        }elseif ($top['h']==='ffffff' && $left['h'] === '000000') { 
+                        #si arriba es blanco
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$labels)]);
+                        
+                        }else{ 
+                        #si ambos son blancos
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$labels)]);
+
+                        }
+                    }
+                }
+            }
+        }
+        $this->paintClusters($labels);
+    }
+
+    public function union($left,$top,$labels)
+    {
+        $cLeft=0;$cTop=0;$clLeft=0;$clTop=0;
+
+        foreach ($labels as $label) {
+
+            if ($label['x'] == $left['x'] && $label['y'] == $left['y']) {
+                $cLeft +=1;
+                $clLeft = $this->find($left,$labels);
+            }
+            if ($label['x'] == $top['x'] && $label['y'] == $top['y']) {
+                $cTop  +=1;
+                $clTop  = $this->find($top,$labels);
+            }
+        }
+        
+        if ($cTop > $cLeft) {
+            return $clTop;
+        }else{
+            return $clLeft;
+        }
+    }
+
 ?>
