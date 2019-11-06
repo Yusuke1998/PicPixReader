@@ -66,42 +66,58 @@ class PixReader extends Pixpic {
                 {
                     $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
                     $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
-                    $topne      = ["x"=>$x+1, "y"=>$y-1, "h"=>$this->hexPixel($x+1,$y-1)]; #top noreste
                     $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
                     $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
                     $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
 
-                    if ($current['h'] === 'ffffff') {
+                    if ($current['h'] != '000000') {
 
                         if ($top['h']==='000000' && $left['h'] === '000000') {
 
-                            if ($topne['h'] === 'ffffff') { 
-
-                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($topne,$labels)]);
-                            }else{
-
-                                $count_clusters+=1;
-                                array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
-                            }
+                            $count_clusters+=1;
+                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$count_clusters]);
                         
-                        }elseif($left['h'] === 'ffffff' && $top['h']==='000000') { 
-
-                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$labels)]);
-                        
-                        }elseif ($top['h']==='ffffff' && $left['h'] === '000000') { 
-
-                            array_push($labels,  ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$labels)]);
                         }else{
-                            array_push($labels, ['x'=>$x,'y'=>$y,'c'=>$this->union($left,$top,$labels)]);
 
-                            array_push($equals, ['x'=>$x,'y'=>$y,'ct'=>$this->find($top,$labels),'cl'=>$this->find($left,$labels)]);
+                            if ($left['h'] === 'ffffff' && $top['h'] != 'ffffff') {
+
+                                array_push($labels, ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$labels)]);
+
+                            }elseif ($top['h'] === 'ffffff' && $left['h'] != 'ffffff') {
+
+                                array_push($labels, ['x'=>$x,'y'=>$y,'c'=>$this->find($top,$labels)]);
+
+                            }elseif($top['h'] === 'ffffff' && $left['h'] === 'ffffff') {
+
+                                if($this->find($top,$labels) !== $this->find($left,$labels)){
+
+                                    array_push($equals, ['x'=>$x,'y'=>$y,'c'=>$this->union2($left,$top,$labels),'ct'=>$this->find($top,$labels),'cl'=>$this->find($left,$labels)]);
+                                
+                                    array_push($labels, ['x'=>$x,'y'=>$y,'c'=>$this->union2($left,$top,$labels)]);
+                                }else{
+                                    array_push($labels, ['x'=>$x,'y'=>$y,'c'=>$this->find($left,$labels)]);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        // $this->showClusters($labels);
+        for ($i=0; $i < sizeof($labels); $i++) {
+            foreach ($equals as $equal) {
+
+                if ($labels[$i]['c'] === $equal['ct']) {
+
+                    $labels[$i]['c']=$equal['c'];
+                
+                }elseif ($labels[$i]['c'] === $equal['cl']) {
+                    
+                    $labels[$i]['c']=$equal['c'];
+
+                }
+            }
+        }
 
         $this->paintClusters($labels);
     }
@@ -113,6 +129,23 @@ class PixReader extends Pixpic {
                 return $label['c'];
             }
         }
+    }
+
+    public function union2($left,$top,$labels)
+    {
+        $cLeft=0;$cTop=0;$clLeft=0;$clTop=0;
+
+        foreach ($labels as $label) {
+
+            if ($label['x'] == $left['x'] && $label['y'] == $left['y']) {
+                $clLeft = $this->find($left,$labels);
+            }
+            if ($label['x'] == $top['x'] && $label['y'] == $top['y']) {
+                $clTop  = $this->find($top,$labels);
+            }
+        }
+
+        return min($clLeft,$clTop);
     }
 
     public function union($left,$top,$labels)
@@ -135,18 +168,6 @@ class PixReader extends Pixpic {
             return $clTop;
         }else{
             return $clLeft;
-        }
-    }
-
-    public function equal($top,$left,$labels)
-    {
-        $cT = $this->find($top,$labels);
-        $cL = $this->find($left,$labels);
-
-        if ($cT != $cL) {
-            return min($cT,$cL);
-        }else{
-            return $cT;
         }
     }
 
