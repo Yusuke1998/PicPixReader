@@ -5,6 +5,96 @@ class PixReader extends Pixpic {
 
     use Filtered, Helpers;
 
+    public function Test()
+    {
+        $cLine=0; #cantidad de lineas
+        $cColor=0; #cantidad de lineas
+        $xLine = 0; #cantidad de pixeles de la linea
+        $equals=[]; #lineas similares
+        $lines=[]; #lineas validas
+        $xLength = imagesx($this->rs);
+
+        $xMax = ($xLength/100)*80; #porcentaje valido para linea (80%)
+
+        for ($y = 0; $y < imagesy($this->rs)-1; $y++){
+            for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
+                if ($x>0 && $y>0)
+                {
+                    $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
+                    $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
+                    $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
+                    $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
+                    $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
+                    
+                    if ($current['h'] != '000000') #Si el px actual es blanco
+                    {
+                        if ($top['h'] === '000000' && $left['h'] === '000000') #nueva linea
+                        {
+                            $cLine+=1;
+                            array_push($lines, [
+                                'x'=>$x,
+                                'y'=>$y,
+                                'l'=>$cLine,
+                                'c'=>1
+                            ]);
+                        }else{
+                            // En cada linea (creada) se debe almacenar 
+                            // la cantidad de pixeles blancos.
+                            if ($left['h'] === 'ffffff' && $right['h'] === '000000') {
+                                
+                                // dd(['Prueba 1'],1);
+                                if ($this->searchlLeft($lines,$left)!=0) {
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchlLeft($lines,$left)
+                                    ]);
+                                }else{
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchlLeft($equals,$left)
+                                    ]);
+                                }
+
+                            }elseif ($left['h'] === 'ffffff' && $right['h'] === 'ffffff') {
+                                
+                                // dd(['Prueba 2'],1);
+                                if ($this->searchlLeft($lines,$left)!=0) {
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchlLeft($lines,$left)
+                                    ]);
+                                }else{
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchlLeft($equals,$left)
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        
+        // dd($lines,1);
+        dd($equals,1);
+    }
+
+    public function searchlLeft($labels,$current)
+    {
+        foreach ($labels as $label) {
+            if ($label['y'] === $current['y'] && $label['x'] === $current['x']) {
+                return $label['l'];
+            }
+        }
+        return false;
+    }
+
     public function Clustering()
     {
         $count_clusters=0;$labels=[];$equals=[];
@@ -51,7 +141,6 @@ class PixReader extends Pixpic {
                 }
             }
         }
-        // dd($labels,1);
         $this->paintClusters($labels);
     }
 
@@ -77,8 +166,6 @@ class PixReader extends Pixpic {
         }
         return min($clLeft,$clTop);
     }
-
-
 
     public function showClusters($labels)
     {
@@ -142,5 +229,39 @@ class PixReader extends Pixpic {
             }
         }
     }
-
 }
+
+
+
+// }elseif ($left['h'] === 'ffffff') 
+//     {
+//         if ($this->left($lines,$current)!=0) {
+//             array_push($equals, [
+//                 'x'=>$x,
+//                 'y'=>$y,
+//                 'l'=>$this->left($lines,$current)
+//             ]);
+//         }
+//     }
+
+//     }else
+//     {
+//         for ($i=$x; $i < sizeof($lines); $i++) { 
+//             if ($this->hexPixel($i,$y) === 'ffffff') {
+//                 $cColor+=1;
+//             }
+//         }
+//         // dd($cColor);
+//     }
+
+// if ($this->hexPixel($x,$y) === 'ffffff') {
+
+//     foreach ($lines as $key => $line)
+//     {
+//         if ($line['l'] === $this->left($lines,$current))
+//         {
+//             dd($key);
+//             $lines[$key]['c'] += 1 ;
+//         }
+//     }
+// }
