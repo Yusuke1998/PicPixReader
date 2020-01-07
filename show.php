@@ -5,6 +5,7 @@ $img = "img/test2.png";
 $px = new PixReader;
 $px->setImage($img);
 $px->zoom=5;
-$px->span=1;
+$px->span=3;
+#$px->Clustering();
 $px->showImage();
 $px->clearCache();

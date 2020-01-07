@@ -8,5 +8,5 @@ $px->zoom=5;
 $px->span=1;
 $px->Test();
 // $px->Clustering();
-$px->showImage();
+// $px->showImage();
 $px->clearCache();

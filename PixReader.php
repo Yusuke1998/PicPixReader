@@ -14,7 +14,7 @@ class PixReader extends Pixpic {
         $lines=[]; #lineas validas
         $xLength = imagesx($this->rs);
 
-        $xMax = ($xLength/100)*80; #porcentaje valido para linea (80%)
+        define('xMax', ($xLength/100)*80); #porcentaje valido para linea (80%)
 
         for ($y = 0; $y < imagesy($this->rs)-1; $y++){
             for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
@@ -80,9 +80,27 @@ class PixReader extends Pixpic {
             }
         }
 
-        
-        // dd($lines,1);
-        dd($equals,1);
+        #contamos los pixeles por linea
+        for ($i=0; $i < sizeof($lines); $i++)
+        {
+            for ($j=0; $j < sizeof($equals); $j++)
+            {
+                if ($equals[$j]['l'] === $lines[$i]['l']) {
+                    $lines[$i]['c']+=1;
+                }
+            }
+        }
+        $new = [];
+        #iteramos y eliminamos las lineas con cantidad de pixeles menor al 80% del tamaño de la imagen
+        for ($k=0; $k < sizeof($lines); $k++)
+        {
+            if ($lines[$k]['c'] > xMax)
+            {
+                array_push($new,$lines[$k]);
+            }
+        }
+
+        dd($new,1);
     }
 
     public function searchlLeft($labels,$current)
