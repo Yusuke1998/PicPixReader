@@ -28,6 +28,7 @@ class PixReader extends Pixpic {
                     
                     if ($current['h'] != '000000') #Si el px actual es blanco
                     {
+                        #Se crea una linea
                         if ($top['h'] === '000000' && $left['h'] === '000000') #nueva linea
                         {
                             $cLine+=1;
@@ -38,8 +39,7 @@ class PixReader extends Pixpic {
                                 'c'=>1
                             ]);
                         }else{
-                            // En cada linea (creada) se debe almacenar 
-                            // la cantidad de pixeles blancos.
+                            #Se pertenece a alguna linea
                             if ($left['h'] === 'ffffff' && $right['h'] === '000000') {
                                 if ($this->searchlLeft($lines,$left)!=0) {
                                     array_push($equals, [
@@ -75,7 +75,6 @@ class PixReader extends Pixpic {
                 }
             }
         }
-
         #contamos los pixeles por linea
         for ($i=0; $i < sizeof($lines); $i++)
         {
@@ -94,23 +93,38 @@ class PixReader extends Pixpic {
                 array_push($okLines,$lines[$k]);
             }
         }
+
         #se elmina la primera linea de pixeles identificada
+        /*
         for ($l=0; $l < 1; $l++)
         {
             for ($m=0; $m < $okLines[$l]['c']; $m++) { 
                 imagesetpixel($this->rs,$okLines[$l]['x']+$m,$okLines[$l]['y'],black);
             }
         }
-    }
+        */
 
-    public function searchlLeft($labels,$current)
-    {
-        foreach ($labels as $label) {
-            if ($label['y'] === $current['y'] && $label['x'] === $current['x']) {
-                return $label['l'];
+        #dd($okLines);
+
+        for ($r=0; $r < 1; $r++)
+        {
+            for ($w=0; $w < $okLines[$r]['c']; $w++)
+            {
+                $x = $okLines[$r]['x']+$w;
+                $y = $okLines[$r]['y'];
+
+                $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
+                $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
+                $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
+                $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
+                $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
+
+                dd($bottom,1);
             }
         }
-        return false;
+
+
+
     }
 
     public function Clustering()
@@ -160,6 +174,16 @@ class PixReader extends Pixpic {
             }
         }
         $this->paintClusters($labels);
+    }
+
+    public function searchlLeft($labels,$current)
+    {
+        foreach ($labels as $label) {
+            if ($label['y'] === $current['y'] && $label['x'] === $current['x']) {
+                return $label['l'];
+            }
+        }
+        return false;
     }
 
     public function find($position,$labels)
