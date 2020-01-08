@@ -5,7 +5,7 @@ class PixReader extends Pixpic {
 
     use Filtered, Helpers;
 
-    public function Test()
+    public function lineSpace()
     {
         $cLine=0; #cantidad de lineas
         $cColor=0; #cantidad de lineas
@@ -13,7 +13,7 @@ class PixReader extends Pixpic {
         $equals=[]; #lineas similares
         $lines=[]; #lineas validas
         $xLength = imagesx($this->rs);
-
+        $okLines = []; #lineas con un tamaño mayor al 80 del ancho de la imagen
         define('xMax', ($xLength/100)*80); #porcentaje valido para linea (80%)
 
         for ($y = 0; $y < imagesy($this->rs)-1; $y++){
@@ -41,8 +41,6 @@ class PixReader extends Pixpic {
                             // En cada linea (creada) se debe almacenar 
                             // la cantidad de pixeles blancos.
                             if ($left['h'] === 'ffffff' && $right['h'] === '000000') {
-                                
-                                // dd(['Prueba 1'],1);
                                 if ($this->searchlLeft($lines,$left)!=0) {
                                     array_push($equals, [
                                         'x'=>$x,
@@ -56,10 +54,8 @@ class PixReader extends Pixpic {
                                         'l'=>$this->searchlLeft($equals,$left)
                                     ]);
                                 }
-
-                            }elseif ($left['h'] === 'ffffff' && $right['h'] === 'ffffff') {
-                                
-                                // dd(['Prueba 2'],1);
+                            }elseif ($left['h'] === 'ffffff' && $right['h'] === 'ffffff')
+                            {
                                 if ($this->searchlLeft($lines,$left)!=0) {
                                     array_push($equals, [
                                         'x'=>$x,
@@ -90,17 +86,21 @@ class PixReader extends Pixpic {
                 }
             }
         }
-        $new = [];
-        #iteramos y eliminamos las lineas con cantidad de pixeles menor al 80% del tamaño de la imagen
+        #iteramos y eliminamos las lineas menores
         for ($k=0; $k < sizeof($lines); $k++)
         {
             if ($lines[$k]['c'] > xMax)
             {
-                array_push($new,$lines[$k]);
+                array_push($okLines,$lines[$k]);
             }
         }
-
-        dd($new,1);
+        #se elmina la primera linea de pixeles identificada
+        for ($l=0; $l < 1; $l++)
+        {
+            for ($m=0; $m < $okLines[$l]['c']; $m++) { 
+                imagesetpixel($this->rs,$okLines[$l]['x']+$m,$okLines[$l]['y'],black);
+            }
+        }
     }
 
     public function searchlLeft($labels,$current)
@@ -248,38 +248,3 @@ class PixReader extends Pixpic {
         }
     }
 }
-
-
-
-// }elseif ($left['h'] === 'ffffff') 
-//     {
-//         if ($this->left($lines,$current)!=0) {
-//             array_push($equals, [
-//                 'x'=>$x,
-//                 'y'=>$y,
-//                 'l'=>$this->left($lines,$current)
-//             ]);
-//         }
-//     }
-
-//     }else
-//     {
-//         for ($i=$x; $i < sizeof($lines); $i++) { 
-//             if ($this->hexPixel($i,$y) === 'ffffff') {
-//                 $cColor+=1;
-//             }
-//         }
-//         // dd($cColor);
-//     }
-
-// if ($this->hexPixel($x,$y) === 'ffffff') {
-
-//     foreach ($lines as $key => $line)
-//     {
-//         if ($line['l'] === $this->left($lines,$current))
-//         {
-//             dd($key);
-//             $lines[$key]['c'] += 1 ;
-//         }
-//     }
-// }
