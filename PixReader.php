@@ -95,36 +95,46 @@ class PixReader extends Pixpic {
         }
 
         #se elmina la primera linea de pixeles identificada
-        /*
+        
         for ($l=0; $l < 1; $l++)
         {
             for ($m=0; $m < $okLines[$l]['c']; $m++) { 
                 imagesetpixel($this->rs,$okLines[$l]['x']+$m,$okLines[$l]['y'],black);
             }
         }
-        */
 
-        #dd($okLines);
-
+        /*
+        $other=[];
         for ($r=0; $r < 1; $r++)
         {
             for ($w=0; $w < $okLines[$r]['c']; $w++)
             {
                 $x = $okLines[$r]['x']+$w;
                 $y = $okLines[$r]['y'];
-
                 $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
                 $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
                 $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
                 $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
                 $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
+                $bottom_left    = ["x"=>$x-1, "y"=>$y+1, "h"=>$this->hexPixel($x-1,$y+1)]; #bottom left
 
-                dd($bottom,1);
+                #linea nueva
+                if ($current['h']=='ffffff' && $left['h']=='000000')
+                {
+                    $c = 0;
+                    $c+=1;
+                    array_push($other, ['x'=>$current['x'],'y'=>$current['y'],'l'=>$c]);
+                }else
+                {
+                    if ($current['h']=='ffffff' && $left['h']=='ffffff')
+                    {
+
+                    }
+                }
             }
         }
-
-
-
+        dd($other,1);
+        */
     }
 
     public function Clustering()
