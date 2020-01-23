@@ -5,8 +5,231 @@ class PixReader extends Pixpic {
 
     use Filtered, Helpers;
 
+    public function lineSpac3()
+    {
+        $candidatos=[]; #candidatos a ser la linea de tiempo
+        $cLine=0; #cantidad de lineas
+        $cColor=0; #cantidad de lineas
+        $xLine = 0; #cantidad de pixeles de la linea
+        $equals=[]; #lineas similares
+        $lines=[]; #lineas validas
+        $xLength = imagesx($this->rs);
+        $okLines = []; #lineas con un tamaño mayor al 80 del ancho de la imagen
+        define('xMax', ($xLength/100)*80); #porcentaje valido para linea (80%)
+        for ($y = 0; $y < imagesy($this->rs)-1; $y++){
+            for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
+                if ($x>0 && $y>0)
+                {
+                    $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
+                    $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
+                    $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
+                    $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
+                    $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
+                    
+                    if ($current['h'] != '000000') #Si el px actual es blanco
+                    {
+                        #Se crea una linea
+                        if ($top['h'] === '000000' && $left['h'] === '000000') #nueva linea
+                        {
+                            $cLine+=1;
+                            array_push($lines, [
+                                'x'=>$x,
+                                'y'=>$y,
+                                'l'=>$cLine,
+                                'c'=>1
+                            ]);
+                        }else{
+                            #Se pertenece a alguna linea
+                            if ($left['h'] === 'ffffff' && $right['h'] === '000000') {
+                                if ($this->searchLeft($lines,$left)!=0) {
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchLeft($lines,$left)
+                                    ]);
+                                }else{
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchLeft($equals,$left)
+                                    ]);
+                                }
+                            #Es parte de una linea
+                            }elseif ($left['h'] === 'ffffff' && $right['h'] === 'ffffff')
+                            {
+                                if ($this->searchLeft($lines,$left)!=0) {
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchLeft($lines,$left)
+                                    ]);
+                                }else{
+                                    array_push($equals, [
+                                        'x'=>$x,
+                                        'y'=>$y,
+                                        'l'=>$this->searchLeft($equals,$left)
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #contamos los pixeles por linea
+        for ($i=0; $i < sizeof($lines); $i++)
+        {
+            for ($j=0; $j < sizeof($equals); $j++)
+            {
+                if ($equals[$j]['l'] === $lines[$i]['l']) {
+                    $lines[$i]['c']+=1;
+                }
+            }
+        }
+        #iteramos y eliminamos las lineas menores
+        for ($k=0; $k < sizeof($lines); $k++)
+        {
+            if ($lines[$k]['c'] > xMax)
+            {
+                array_push($okLines,$lines[$k]);
+            }
+        }
+        $candidatos_of=[];
+        $cLine = 0;
+        #prueba para encontrar candidatos
+        for ($y = 0; $y < imagesy($this->rs)-1; $y++){
+            for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
+                if ($x>0 && $y>=$okLines[0]['y'])
+                {
+                    $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
+                    $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
+                    $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
+                    $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
+                    $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
+                    // dd($current,1);
+                    if ($current['h'] === 'ffffff') {
+
+                        if ($left['h'] === '000000')
+                        {
+                            $cLine+=1;
+                            array_push($candidatos, [
+                                "x"=>$x, "y"=>$y, "l"=>$cLine, 'c'=>1
+                            ]);
+
+                        }else{
+                            if ($this->searchY($candidatos,$current)!==null&&$this->searchY($candidatos,$current)>0) {
+                                array_push($candidatos_of, [
+                                    'x'=>$x,
+                                    'y'=>$y,
+                                    'l'=>$this->searchY($candidatos,$current)
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for ($i=0; $i < sizeof($candidatos); $i++)
+        {
+            for ($j=0; $j < sizeof($candidatos_of); $j++)
+            {
+                if ($candidatos_of[$j]['l'] === $candidatos[$i]['l']) {
+                    $candidatos[$i]['c']+=1;
+                }
+            }
+        }
+        $okLines=[];
+        for ($k=0; $k < sizeof($candidatos); $k++)
+        {
+            if ($candidatos[$k]['c'] > xMax)
+            {
+                array_push($okLines,$candidatos[$k]);
+            }
+        }
+
+        #se elmina la primera y la ultima linea de pixeles identificada
+        for ($l=0; $l < 1; $l++)
+        {
+            for ($m=0; $m < $okLines[$l]['c']; $m++) { 
+                imagesetpixel($this->rs,$okLines[$l]['x']+$m,$okLines[$l]['y'],black);
+            }
+        }
+        dd($okLines,1);
+    }
+
+    public function searchY($labels,$current)
+    {
+        foreach ($labels as $key => $label) {
+            if ($label['y']===$current['y']) {
+                return $label['l'];
+            }
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function lineSpace()
     {
+        $candidatos=0;
         $cLine=0; #cantidad de lineas
         $cColor=0; #cantidad de lineas
         $xLine = 0; #cantidad de pixeles de la linea
@@ -41,32 +264,33 @@ class PixReader extends Pixpic {
                         }else{
                             #Se pertenece a alguna linea
                             if ($left['h'] === 'ffffff' && $right['h'] === '000000') {
-                                if ($this->searchlLeft($lines,$left)!=0) {
+                                if ($this->searchLeft($lines,$left)!=0) {
                                     array_push($equals, [
                                         'x'=>$x,
                                         'y'=>$y,
-                                        'l'=>$this->searchlLeft($lines,$left)
+                                        'l'=>$this->searchLeft($lines,$left)
                                     ]);
                                 }else{
                                     array_push($equals, [
                                         'x'=>$x,
                                         'y'=>$y,
-                                        'l'=>$this->searchlLeft($equals,$left)
+                                        'l'=>$this->searchLeft($equals,$left)
                                     ]);
                                 }
+                            #Es parte de una linea
                             }elseif ($left['h'] === 'ffffff' && $right['h'] === 'ffffff')
                             {
-                                if ($this->searchlLeft($lines,$left)!=0) {
+                                if ($this->searchLeft($lines,$left)!=0) {
                                     array_push($equals, [
                                         'x'=>$x,
                                         'y'=>$y,
-                                        'l'=>$this->searchlLeft($lines,$left)
+                                        'l'=>$this->searchLeft($lines,$left)
                                     ]);
                                 }else{
                                     array_push($equals, [
                                         'x'=>$x,
                                         'y'=>$y,
-                                        'l'=>$this->searchlLeft($equals,$left)
+                                        'l'=>$this->searchLeft($equals,$left)
                                     ]);
                                 }
                             }
@@ -93,48 +317,13 @@ class PixReader extends Pixpic {
                 array_push($okLines,$lines[$k]);
             }
         }
-
         #se elmina la primera linea de pixeles identificada
-        
         for ($l=0; $l < 1; $l++)
         {
             for ($m=0; $m < $okLines[$l]['c']; $m++) { 
                 imagesetpixel($this->rs,$okLines[$l]['x']+$m,$okLines[$l]['y'],black);
             }
         }
-
-        /*
-        $other=[];
-        for ($r=0; $r < 1; $r++)
-        {
-            for ($w=0; $w < $okLines[$r]['c']; $w++)
-            {
-                $x = $okLines[$r]['x']+$w;
-                $y = $okLines[$r]['y'];
-                $current    = ["x"=>$x, "y"=>$y, "h"=>$this->hexPixel($x,$y)]; #center
-                $top        = ["x"=>$x, "y"=>$y-1, "h"=>$this->hexPixel($x,$y-1)]; #top
-                $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
-                $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
-                $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
-                $bottom_left    = ["x"=>$x-1, "y"=>$y+1, "h"=>$this->hexPixel($x-1,$y+1)]; #bottom left
-
-                #linea nueva
-                if ($current['h']=='ffffff' && $left['h']=='000000')
-                {
-                    $c = 0;
-                    $c+=1;
-                    array_push($other, ['x'=>$current['x'],'y'=>$current['y'],'l'=>$c]);
-                }else
-                {
-                    if ($current['h']=='ffffff' && $left['h']=='ffffff')
-                    {
-
-                    }
-                }
-            }
-        }
-        dd($other,1);
-        */
     }
 
     public function Clustering()
@@ -186,7 +375,7 @@ class PixReader extends Pixpic {
         $this->paintClusters($labels);
     }
 
-    public function searchlLeft($labels,$current)
+    public function searchLeft($labels,$current)
     {
         foreach ($labels as $label) {
             if ($label['y'] === $current['y'] && $label['x'] === $current['x']) {

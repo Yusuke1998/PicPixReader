@@ -1,12 +1,13 @@
 <?php 
 
 require 'PixReader.php';
-$img = "img/test2.png";
+$img = "img/test3.png";
 $px = new PixReader;
 $px->setImage($img);
-$px->zoom=5;
-$px->span=2;
+$px->zoom=4;
+$px->span=3;
+// $px->lineSpac3();
 // $px->lineSpace();
-#$px->Clustering();
+// $px->Clustering();
 $px->showImage();
 $px->clearCache();
