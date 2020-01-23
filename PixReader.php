@@ -106,7 +106,6 @@ class PixReader extends Pixpic {
                     $right      = ["x"=>$x+1, "y"=>$y, "h"=>$this->hexPixel($x+1,$y)]; #right
                     $bottom     = ["x"=>$x, "y"=>$y+1, "h"=>$this->hexPixel($x,$y+1)]; #bottom
                     $left       = ["x"=>$x-1, "y"=>$y, "h"=>$this->hexPixel($x-1,$y)]; #left
-                    // dd($current,1);
                     if ($current['h'] === 'ffffff') {
 
                         if ($left['h'] === '000000')
@@ -146,15 +145,15 @@ class PixReader extends Pixpic {
                 array_push($okLines,$candidatos[$k]);
             }
         }
-
         #se elmina la primera y la ultima linea de pixeles identificada
-        for ($l=0; $l < 1; $l++)
-        {
-            for ($m=0; $m < $okLines[$l]['c']; $m++) { 
-                imagesetpixel($this->rs,$okLines[$l]['x']+$m,$okLines[$l]['y'],black);
-            }
+        $firstLine  = 0;
+        $lastLine   = sizeof($okLines)-1;
+        for ($m=0; $m < $okLines[$firstLine]['c']; $m++) { 
+            imagesetpixel($this->rs,$okLines[$firstLine]['x']+$m,$okLines[$firstLine]['y'],black);
         }
-        dd($okLines,1);
+        for ($m=0; $m < $okLines[$lastLine]['c']; $m++) { 
+            imagesetpixel($this->rs,$okLines[$lastLine]['x']+$m,$okLines[$lastLine]['y'],black);
+        }
     }
 
     public function searchY($labels,$current)
