@@ -63,6 +63,112 @@ trait Filtered
 
 trait Helpers
 {
+    public function searchY($labels,$current)
+    {
+        foreach ($labels as $key => $label) {
+            if ($label['y']===$current['y']) {
+                return $label['l'];
+            }
+        }
+        return false;
+    }
+
+    public function searchLeft($labels,$current)
+    {
+        foreach ($labels as $label) {
+            if ($label['y'] === $current['y'] && $label['x'] === $current['x']) {
+                return $label['l'];
+            }
+        }
+        return false;
+    }
+
+    public function find($position,$labels)
+    {
+        foreach ($labels as $label) {
+            if ($position['x'] == $label['x'] && $position['y'] == $label['y']) {
+                return $label['c'];
+            }
+        }
+    }
+
+    public function union($left,$top,$labels)
+    {
+        $cLeft=0;$cTop=0;$clLeft=0;$clTop=0;
+        foreach ($labels as $label) {
+            if ($label['x'] == $left['x'] && $label['y'] == $left['y']) {
+                $clLeft = $this->find($left,$labels);
+            }
+            if ($label['x'] == $top['x'] && $label['y'] == $top['y']) {
+                $clTop  = $this->find($top,$labels);
+            }
+        }
+        return min($clLeft,$clTop);
+    }
+
+    public function showClusters($labels)
+    {
+        foreach ($labels as $label) {
+            echo "x-".$label['x']." y-".$label['y']." c-".$label['c']."<br>";
+        }
+    }
+
+    public function paintClusters($labels)
+    {
+        foreach ($labels as $label) {
+            switch ($label['c']) {
+                case 1:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],blue2);
+                    break;
+                case 2:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],green);
+                    break;
+                case 3:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],yellow2);
+                    break;
+                case 4:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],magenta);
+                    break;
+                case 5:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],blue3);
+                    break;
+                case 6:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],green2);
+                    break;
+                case 7:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],red3);
+                    break;
+                case 8:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],gray);
+                    break;
+                case 9:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],green3);
+                    break;
+                case 10:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],gray3);
+                    break;
+                case 11:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],red2);
+                    break;
+                case 12:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],blue);
+                    break;
+                case 13:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],cian);
+                    break;
+                case 14:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],gray2);
+                    break;
+                case 15:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],magenta2);
+                    break;
+                default:
+                    imagesetpixel($this->rs,$label['x'],$label['y'],red);
+                    break;
+            }
+        }
+    }
+    
 	public function showImage()
     {
         $a=null;

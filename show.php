@@ -6,7 +6,6 @@ $px = new PixReader;
 $px->setImage($img);
 $px->zoom=4;
 $px->span=3;
-// $px->lineSpac3();
 // $px->lineSpace();
 // $px->Clustering();
 $px->showImage();
