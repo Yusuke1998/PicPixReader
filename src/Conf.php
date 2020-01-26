@@ -1,5 +1,7 @@
 <?php 
 require "src/Tools.php";
+require "src/Filters.php";
+require "src/Helpers.php";
 require "vendor/autoload.php";
 ini_set('memory_limit', '2048M');
 set_time_limit(0);

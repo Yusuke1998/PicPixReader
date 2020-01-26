@@ -3,7 +3,7 @@ require_once "src/Conf.php";
 
 class PixReader extends Pixpic {
 
-    use Filtered, Helpers;
+    use Filters, Helpers;
 
     public function lineSpace()
     {
