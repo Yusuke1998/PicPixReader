@@ -1,6 +1,6 @@
 <?php 
 
-function dd($var, $pretty = false)
+function dd($var, $pretty = true)
 {
     $backtrace = debug_backtrace();
     echo "\n<pre>\n";
@@ -15,4 +15,4 @@ function dd($var, $pretty = false)
     die;
 }
 
- ?>
+?>
