@@ -145,6 +145,7 @@ class PixReader extends Pixpic {
                 array_push($okLines,$candidatos[$k]);
             }
         }
+
         #se elmina la primera y la ultima linea de pixeles identificada
         $firstLine  = 0;
         $lastLine   = sizeof($okLines)-1;

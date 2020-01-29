@@ -52,58 +52,32 @@ trait Helpers
         }
     }
 
-    public function paintClusters($labels)
+    // crear un arreglo dinamico, si la etiqueta no extiste en el arreglo entonces lo agrego al arreglo con un color random, todo mediante iteraciones.
+    
+    public function labelColor($labels,$c)
     {
         foreach ($labels as $label) {
-            switch ($label['c']) {
-                case 1:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],blue2);
-                    break;
-                case 2:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],green);
-                    break;
-                case 3:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],yellow2);
-                    break;
-                case 4:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],magenta);
-                    break;
-                case 5:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],blue3);
-                    break;
-                case 6:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],green2);
-                    break;
-                case 7:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],red3);
-                    break;
-                case 8:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],gray);
-                    break;
-                case 9:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],green3);
-                    break;
-                case 10:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],gray3);
-                    break;
-                case 11:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],red2);
-                    break;
-                case 12:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],blue);
-                    break;
-                case 13:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],cian);
-                    break;
-                case 14:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],gray2);
-                    break;
-                case 15:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],magenta2);
-                    break;
-                default:
-                    imagesetpixel($this->rs,$label['x'],$label['y'],red);
-                    break;
+            if ($label['c'] == $c)
+            {
+                return $label['h'];
+            }
+        }
+        return false;
+    }
+
+
+    public function paintClusters($labels)
+    {
+        $colores=[];
+        array_push($colores,['c'=>'1','h'=>blue]);
+        foreach ($labels as $label)
+        {
+            if ($color = $this->labelColor($colores,$label['c'])) {
+                imagesetpixel($this->rs,$label['x'],$label['y'],$color);
+            }else{
+                $newColor = rand(blue, 16777215);
+                array_push($colores,['c'=>$label['c'],'h'=>$newColor]);
+                imagesetpixel($this->rs,$label['x'],$label['y'],$newColor);
             }
         }
     }

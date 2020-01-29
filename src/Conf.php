@@ -37,6 +37,4 @@ const red3 = 16711744;
 const cian = 65535;
 const cian2 = 8517619;
 const cian3 = 11138546;
-
-$colorRandom = dechex(rand(255, 16777215));
 // Fin Colores
