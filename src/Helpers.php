@@ -2,6 +2,24 @@
 
 trait Helpers
 {
+    public function groupConsecutiveNumbers(array $input): array{
+        // se agrupan los numeros consecutivos, es decir los valores de y, si son consecutivos es una misma linea
+        $result = [];
+        $previous = array_shift($input);
+        $currentGroup = [$previous];
+        foreach ($input as $current) {
+            if($current['l'] == $previous['l']+1)
+                $currentGroup[] = $current;
+            else{
+                $result[] = $currentGroup;
+                $currentGroup = [$current];
+            }
+            $previous = $current;
+        }
+        $result[] = $currentGroup;
+        return $result;
+    }
+    
     public function searchY($labels,$current)
     {
         foreach ($labels as $key => $label) {
