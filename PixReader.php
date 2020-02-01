@@ -96,7 +96,7 @@ class PixReader extends Pixpic {
         }
         $candidatos_of=[];
         $cLine = 0;
-        #prueba para encontrar candidatos
+        #busqueda de posibles lineas candidatas
         for ($y = 0; $y < imagesy($this->rs)-1; $y++){
             for ($x = 0; $x < imagesx($this->rs)-1; $x++) {
                 if ($x>0 && $y>=$okLines[0]['y'])
@@ -128,6 +128,7 @@ class PixReader extends Pixpic {
                 }
             }
         }
+        // se determinan los candidatos verdaderos
         for ($i=0; $i < sizeof($candidatos); $i++)
         {
             for ($j=0; $j < sizeof($candidatos_of); $j++)
@@ -137,6 +138,7 @@ class PixReader extends Pixpic {
                 }
             }
         }
+        // se obtienen las lineas validas, mayores a un 80% del ancho de la imagen
         $okLines=[];
         for ($k=0; $k < sizeof($candidatos); $k++)
         {
@@ -145,16 +147,37 @@ class PixReader extends Pixpic {
                 array_push($okLines,$candidatos[$k]);
             }
         }
+        // se agrupan las lineas
+        $okLines = $this->groupConsecutiveNumbers($okLines);
+        for ($l=0; $l < sizeof($okLines); $l++) { 
+            #se elmina la primera y la ultima linea de pixeles identificada
+            $firstLine  = 0;
+            $lastLine   = sizeof($okLines[$l])-1;
+            for ($m=0; $m < $okLines[$l][$firstLine]['c']; $m++) { 
+                imagesetpixel($this->rs,$okLines[$l][$firstLine]['x']+$m,$okLines[$l][$firstLine]['y'],black);
+            }
+            for ($m=0; $m < $okLines[$l][$lastLine]['c']; $m++) { 
+                imagesetpixel($this->rs,$okLines[$l][$lastLine]['x']+$m,$okLines[$l][$lastLine]['y'],black);
+            }
+        }
+    }
 
-        #se elmina la primera y la ultima linea de pixeles identificada
-        $firstLine  = 0;
-        $lastLine   = sizeof($okLines)-1;
-        for ($m=0; $m < $okLines[$firstLine]['c']; $m++) { 
-            imagesetpixel($this->rs,$okLines[$firstLine]['x']+$m,$okLines[$firstLine]['y'],black);
+    public function groupConsecutiveNumbers(array $input): array{
+        // se agrupan los numeros consecutivos, es decir los valores de y, si son consecutivos es una misma linea
+        $result = [];
+        $previous = array_shift($input);
+        $currentGroup = [$previous];
+        foreach ($input as $current) {
+            if($current['l'] == $previous['l']+1)
+                $currentGroup[] = $current;
+            else{
+                $result[] = $currentGroup;
+                $currentGroup = [$current];
+            }
+            $previous = $current;
         }
-        for ($m=0; $m < $okLines[$lastLine]['c']; $m++) { 
-            imagesetpixel($this->rs,$okLines[$lastLine]['x']+$m,$okLines[$lastLine]['y'],black);
-        }
+        $result[] = $currentGroup;
+        return $result;
     }
 
     public function Clustering()

@@ -1,7 +1,7 @@
 <?php
 
 require 'PixReader.php';
-$img = "img/test3.png";
+$img = "img/test6.png";
 
 $px = new PixReader;
 $px->setImage($img);
